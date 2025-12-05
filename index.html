@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>血壓小日記</title>
+
+    <!-- 引入字體：Noto Sans TC (中文) 與 Rubik (數字) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="icon" type="image/png" href="./icon.png">
+    <link rel="apple-touch-icon" href="./icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon.png">
+
+    <!-- 引入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js" defer></script>
+
+</head>
+<body>
+
+    <div class="container">
+        <!-- 首頁 (列表與摘要) -->
+        <div id="view-home">
+            <header>
+                <h1>❤️ 血壓小日記</h1>
+                <!-- <button class="btn-text" onclick="app.exportData()">📤 匯出</button> -->
+            </header>
+
+            <!-- 提醒卡片 -->
+            <div id="reminder-card" class="reminder-card">
+                <div class="reminder-title">早安！</div>
+                <div class="reminder-text">今天還沒有量血壓喔，花一分鐘記錄一下吧。</div>
+            </div>
+
+            <!-- Tab 切換 -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="app.switchTab('list')">📋 紀錄列表</button>
+                <button class="tab-btn" onclick="app.switchTab('chart')">📈 一週趨勢</button>
+            </div>
+
+            <!-- 列表視圖 -->
+            <div id="tab-list">
+                <div class="input-row" style="margin-bottom: 12px;">
+                    <select id="filter-range" class="form-select" onchange="app.renderList()" style="padding: 8px; font-size: 0.9rem;">
+                        <option value="7">最近 7 天</option>
+                        <option value="30">最近 30 天</option>
+                        <option value="999">全部紀錄</option>
+                    </select>
+                </div>
+                <div id="record-list" class="record-list">
+                    <!-- Javascript 渲染內容 -->
+                </div>
+            </div>
+
+            <!-- 圖表視圖 -->
+            <div id="tab-chart" class="hidden">
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <p style="text-align: center; font-size: 0.9rem; color: #888; margin-top: 12px;">顯示最近 7 筆紀錄趨勢</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 懸浮新增按鈕 -->
+    <button class="fab" onclick="app.openForm()">+</button>
+
+    <!-- 新增/編輯 表單頁面 -->
+    <div id="modal-form" class="modal">
+        <div class="container">
+            <div class="form-header">
+                <h2 id="form-title">新增紀錄</h2>
+                <button class="btn-text" style="font-size: 1.2rem;" onclick="app.closeForm()">✕</button>
+            </div>
+
+            <form id="bp-form" onsubmit="app.saveRecord(event)">
+                <input type="hidden" id="record-id">
+
+                <div class="input-row">
+                    <div class="form-group">
+                        <label class="form-label">收縮壓 (高)</label>
+                        <input type="number" id="sys" class="form-input" placeholder="120" required min="50" max="300" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">舒張壓 (低)</label>
+                        <input type="number" id="dia" class="form-input" placeholder="80" required min="30" max="200" inputmode="numeric">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">心跳 (BPM)</label>
+                    <input type="number" id="pulse" class="form-input" placeholder="72" required inputmode="numeric">
+                </div>
+
+                <div class="input-row">
+                    <div class="form-group">
+                        <label class="form-label">日期</label>
+                        <input type="date" id="date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">時間</label>
+                        <input type="time" id="time" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">時段</label>
+                    <select id="period" class="form-select">
+                        <option value="morning">☀️ 早上 (剛起床)</option>
+                        <option value="noon">🌤️ 中午</option>
+                        <option value="evening">🌙 晚上 (睡前)</option>
+                        <option value="other">🕒 其他時間</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">備註 (選填)</label>
+                    <input type="text" id="note" class="form-input" placeholder="例：有吃藥、剛運動完...">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 12px;">儲存紀錄</button>
+
+                <button type="button" id="btn-delete" class="btn btn-text" style="width: 100%; margin-top: 20px; color: #E57373;" onclick="app.deleteRecord()">刪除此紀錄</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 提示框 -->
+    <div id="toast" class="toast">已匯出到剪貼簿！</div>
+</body>
+</html>
